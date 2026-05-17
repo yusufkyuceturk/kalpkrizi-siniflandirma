@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import MinMaxScaler
 
-data = pd.read_csv('C:/Users/Selin/PycharmProjects/pythonProject/heart.csv') #dosyayı açarız
+data = pd.read_csv('C:/Users/ykena/PycharmProjects/pythonProject/heart.csv') #dosyayı açarız
 print(data.isnull().sum()) #null veri kontrolü
 
 duplicates = data[data.duplicated(keep=False)]
