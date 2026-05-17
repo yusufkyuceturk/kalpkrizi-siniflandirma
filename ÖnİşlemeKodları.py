@@ -21,5 +21,5 @@ scaler = MinMaxScaler() #normalizasyon işlemleri içim
 normallesecekler = ['Age', 'RestingBP', 'Cholesterol', 'MaxHR', 'Oldpeak']
 
 data[normallesecekler] = scaler.fit_transform(data[normallesecekler]).round(2)
-data.to_csv('C:/Users/Selin/PycharmProjects/pythonProject/heart_normalized.csv', index=False)
+data.to_csv('C:/Users/ykena/PycharmProjects/pythonProject/heart_normalized.csv', index=False)
 print(data) #veri ön işleme tamamlandı ve csv dosyasına kaydedildi
