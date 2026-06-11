@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 import matplotlib.pyplot as plt
@@ -28,8 +28,8 @@ param_grid = {
 # Karar ağacı modeli
 clf = DecisionTreeClassifier(random_state=0)
 
-# Grid Search ile hiperparametre arama
-grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, cv=5, scoring='accuracy')
+# Grid Search ile hiperparametre arama (Hedef: f1_weighted)
+grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, cv=5, scoring='f1_weighted')
 grid_search.fit(X_train, y_train)
 
 # En iyi parametreleri ve modeli al
@@ -58,6 +58,15 @@ conf_matrix_df = pd.DataFrame(conf_matrix,
 print("\nConfusion Matrix:")
 print(conf_matrix_df)
 
+# 5-KATLI ÇAPRAZ DOĞRULAMA (CROSS-VALIDATION) İLE F1 HESAPLAMA
+# En iyi modelin F1 performansını tüm veri setini 5'e bölerek test ediyoruz
+cv_f1_scores = cross_val_score(best_model, X, y, cv=5, scoring='f1_weighted')
+cv_f1_mean = cv_f1_scores.mean()
+
+print("\n--- MODEL PERFORMANS ÖZETİ ---")
+print(f"Test Seti Doğruluk (Accuracy): {accuracy * 100:.2f}%")
+print(f"5-Katlı Çapraz Doğrulama F1 Skoru: {cv_f1_mean * 100:.2f}%\n")
+
 # Karar ağacını görselleştir
 plt.figure(figsize=(20, 10))
 plot_tree(best_model, feature_names=X.columns, class_names=["No Heart Disease", "Heart Disease"], filled=True)
@@ -68,7 +77,8 @@ plt.show()
 classification_rep = classification_report(y_test, y_pred, output_dict=True)
 results_df = pd.DataFrame({
     "Metric": ["Accuracy", "Macro Avg Precision", "Macro Avg Recall", "Macro Avg F1-Score", 
-               "Weighted Avg Precision", "Weighted Avg Recall", "Weighted Avg F1-Score"],
+               "Weighted Avg Precision", "Weighted Avg Recall", "Weighted Avg F1-Score",
+               "5-Fold CV F1-Score"], # Yeni metrik tabloya eklendi
     "Score": [
         accuracy,
         classification_rep["macro avg"]["precision"],
@@ -76,7 +86,8 @@ results_df = pd.DataFrame({
         classification_rep["macro avg"]["f1-score"],
         classification_rep["weighted avg"]["precision"],
         classification_rep["weighted avg"]["recall"],
-        classification_rep["weighted avg"]["f1-score"]
+        classification_rep["weighted avg"]["f1-score"],
+        cv_f1_mean # Yeni metriğin değeri
     ]
 })
 
@@ -104,12 +115,6 @@ ax.set_xticklabels(["No Heart Disease (Pred)", "Heart Disease (Pred)"], rotation
 ax.set_yticklabels(["No Heart Disease (Actual)", "Heart Disease (Actual)"])
 plt.title("Confusion Matrix", pad=20)
 plt.show()
-
-# Sonuçları yazdır
-print(f"Doğruluk: {accuracy * 100:.2f}%")
-print(f"F1 Skoru: {classification_rep['weighted avg']['f1-score'] * 100:.2f}%")
-print(f"Precision: {classification_rep['weighted avg']['precision'] * 100:.2f}%")
-print(f"Recall: {classification_rep['weighted avg']['recall'] * 100:.2f}%")
 
 
 
@@ -250,5 +255,3 @@ ax3.set_xticklabels(["No Heart Disease (Pred)", "Heart Disease (Pred)"], rotatio
 ax3.set_yticklabels(["No Heart Disease (Actual)", "Heart Disease (Actual)"])
 plt.title("Figure 3: Confusion Matrix", pad=20)
 plt.show() """
-
-
